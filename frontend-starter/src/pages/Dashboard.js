@@ -1,4 +1,4 @@
-import React,{useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useState} from 'react';
 import {Box,Flex,Grid,Heading,Text,Button,HStack,SimpleGrid,Badge,Icon,Progress,Table,Thead,Tbody,Tr,Th,Td,Spinner} from '@chakra-ui/react';
 import {FiMessageCircle,FiAlertTriangle,FiClock,FiSmile,FiActivity,FiArrowUpRight,FiChevronRight} from 'react-icons/fi';
 import {useAppData} from '../context/AppDataContext';
@@ -11,11 +11,12 @@ const Metric=({label,value,change,icon,color,down})=><Card p={4} borderTop="3px 
 const chartData=[38,48,44,61,55,74,68,91,80,98,87,104].map((v,i)=>({time:i,volume:v,sla:Math.round(v*.57+12)}));
 
 const Dashboard=()=>{
- const {conversations,loading}=useAppData(); const [range,setRange]=useState('Today'); const nav=useNavigate();
- const active=conversations.filter(c=>c.status==='active').length;
- const escalated=conversations.filter(c=>c.status==='escalated').length;
+ const {conversations,loading}=useAppData(); const [range,setRange]=useState('Today'); const [liveMetrics,setLiveMetrics]=useState(null);
+ useEffect(()=>{const es=new EventSource('http://localhost:8080/api/dashboard/stream'); es.addEventListener('metrics',e=>{try{setLiveMetrics(JSON.parse(e.data));}catch(_){} }); return ()=>es.close();},[]); const nav=useNavigate();
+ const active=liveMetrics?.active ?? conversations.filter(c=>c.status==='active').length;
+ const escalated=liveMetrics?.escalations ?? conversations.filter(c=>c.status==='escalated').length;
  const resolved=conversations.filter(c=>c.status==='resolved').length;
- const csat=conversations.length?Math.round(conversations.reduce((s,c)=>s+(c.metrics?.sentiment||.82),0)/conversations.length*100):87;
+ const csat=liveMetrics?.csat ?? (conversations.length?Math.round(conversations.reduce((s,c)=>s+(c.metrics?.sentiment||.82),0)/conversations.length*100):87);
  const queue=useMemo(()=>[...conversations].sort((a,b)=>({high:0,medium:1,low:2}[a.alertLevel]||3)-({high:0,medium:1,low:2}[b.alertLevel]||3)).slice(0,5),[conversations]);
  const rows=queue.length?queue:[{id:'demo-1',customer:{name:'Elena Vasquez'},tags:['Refund'],status:'escalated',alertLevel:'high'},{id:'demo-2',customer:{name:'Marcus Lee'},tags:['Account'],status:'active',alertLevel:'medium'},{id:'demo-3',customer:{name:'Noah Williams'},tags:['Delivery'],status:'waiting',alertLevel:'medium'},{id:'demo-4',customer:{name:'Ava Thompson'},tags:['Product'],status:'active',alertLevel:'low'},{id:'demo-5',customer:{name:'Oliver Chen'},tags:['Billing'],status:'active',alertLevel:'low'}];
  return <Box>
@@ -26,8 +27,8 @@ const Dashboard=()=>{
   <SimpleGrid columns={{base:1,sm:2,lg:5}} spacing={3} mb={4}>
    <Metric label="Active conversations" value={active||1} change="+14.2%" icon={FiMessageCircle} color="blue.500"/>
    <Metric label="Escalations" value={escalated} change="-8.1%" icon={FiAlertTriangle} color="orange.500" down/>
-   <Metric label="Resolution rate" value={conversations.length?Math.round(resolved/conversations.length*100)+'%':'73.4%'} change="+4.6%" icon={FiActivity} color="green.500"/>
-   <Metric label="Avg response time" value="06:18" change="-12.4%" icon={FiClock} color="purple.500" down/>
+   <Metric label="Resolution rate" value={(liveMetrics?.resolutionRate ?? (conversations.length?Math.round(resolved/conversations.length*100):73.4))+'%'} change="+4.6%" icon={FiActivity} color="green.500"/>
+   <Metric label="Avg response time" value={liveMetrics ? `${String(Math.floor(liveMetrics.avgResponseTime/60)).padStart(2,"0")}:${String(liveMetrics.avgResponseTime%60).padStart(2,"0")}` : "06:18"} change="-12.4%" icon={FiClock} color="purple.500" down/>
    <Metric label="CSAT" value={csat+'%'} change="+3.2%" icon={FiSmile} color="teal.500"/>
   </SimpleGrid>
   <Grid templateColumns={{base:'1fr',xl:'1.7fr 1fr 1fr'}} gap={3} mb={3}>
