@@ -15,6 +15,8 @@ const agentsRoutes = require('./routes/agents');
 const knowledgeBaseRoutes = require('./routes/knowledgeBase');
 const analyticsRoutes = require('./routes/analytics');
 const interveneRoutes = require('./routes/intervene');
+const templatesRoutes = require('./routes/templates');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -45,6 +47,8 @@ app.use('/api/agents', agentsRoutes);
 app.use('/api/knowledge-base', knowledgeBaseRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/intervene', interveneRoutes);
+app.use('/api/templates', templatesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
