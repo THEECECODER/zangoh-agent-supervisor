@@ -65,57 +65,57 @@ const Templates=()=>{
  const cardBg=['#f7f5ff','#f1f8fc','#fffaf0','#f1faf6'];
  return <Box>
    <Flex justify="space-between" align="start" mb={5} gap={4}>
-     <Box><Heading size="lg" letterSpacing="-0.4px">Template Governance Workspace</Heading><Text fontSize="11px" color="gray.500" mt={1}>Manage content quality, approvals, localization, performance, and lifecycle.</Text></Box>
+     <Box><Heading size="lg" letterSpacing="-0.4px">Template Governance Workspace</Heading><Text fontSize="11px" color="textSecondary" mt={1}>Manage content quality, approvals, localization, performance, and lifecycle.</Text></Box>
      <Button size="sm" leftIcon={<FiPlus/>} onClick={openNew}>Create template</Button>
    </Flex>
 
-   <Grid templateColumns={{base:'1fr',xl:'145px minmax(0,1fr) 250px'}} gap={0} bg="white" border="1px solid" borderColor="gray.200" borderRadius="12px" overflow="hidden" minH={{xl:'610px'}}>
-     <Box borderRight="1px solid" borderColor="gray.200" p={3}>
-       <Text fontSize="8px" fontWeight="900" color="gray.500" mb={2}>TEMPLATE LIBRARY</Text>
+   <Grid templateColumns={{base:'1fr',xl:'145px minmax(0,1fr) 250px'}} gap={0} bg="surface" border="1px solid" borderColor="border" borderRadius="12px" overflow="hidden" minH={{xl:'610px'}}>
+     <Box borderRight="1px solid" borderColor="border" p={3}>
+       <Text fontSize="8px" fontWeight="900" color="textSecondary" mb={2}>TEMPLATE LIBRARY</Text>
        <Input size="xs" mb={3} placeholder="Search categories" leftIcon={<FiSearch/>}/>
        <VStack align="stretch" spacing={1}>
         {categories.map((x,i)=><Box key={x} px={2} py={1.5} borderRadius="6px" bg={category===x?'purple.50':'transparent'} color={category===x?'purple.700':'gray.600'} cursor="pointer" onClick={()=>setCategory(x)}><Flex align="center" gap={2}><Box w="5px" h="5px" borderRadius="full" bg={i===0?'purple.400':i<3?'gray.400':i===3?'purple.300':i===4?'blue.400':i===5?'green.400':'orange.400'}/><Text fontSize="9px">{x}</Text>{i===0&&<Badge ml="auto" fontSize="7px" colorScheme="purple">{templates.length||24}</Badge>}</Flex></Box>)}
        </VStack>
        <Divider my={4}/>
-       <Text fontSize="8px" fontWeight="900" color="gray.500" mb={2}>BY CHANNEL</Text>
+       <Text fontSize="8px" fontWeight="900" color="textSecondary" mb={2}>BY CHANNEL</Text>
        <VStack align="stretch" spacing={1}>{channels.slice(1).map((x,i)=><Box key={x} px={2} py={1.5} cursor="pointer" onClick={()=>setChannel(channel===x?'All channels':x)}><Flex align="center" gap={2}><Box w="5px" h="5px" borderRadius="full" bg={['orange.400','blue.400','cyan.400','purple.400'][i]}/><Text fontSize="9px" color={channel===x?'purple.700':'gray.600'}>{x}</Text></Flex></Box>)}</VStack>
      </Box>
 
      <Box p={4} minW={0}>
        <Flex justify="space-between" align="center" mb={3} gap={2} wrap="wrap">
-         <Box><Heading size="sm">Response Templates</Heading><Text fontSize="9px" color="gray.500">Choose a reply and customize it before inserting.</Text></Box>
+         <Box><Heading size="sm">Response Templates</Heading><Text fontSize="9px" color="textSecondary">Choose a reply and customize it before inserting.</Text></Box>
        </Flex>
        <Flex gap={2} mb={3} wrap="wrap">
          <Input flex="1" minW="180px" size="sm" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search title, message, or tag"/>
          <Select w="125px" size="sm" value={channel} onChange={e=>setChannel(e.target.value)}>{channels.map(x=><option key={x}>{x}</option>)}</Select>
          <Select w="105px" size="sm" value={sort} onChange={e=>setSort(e.target.value)}><option>Most used</option><option>Name</option></Select>
        </Flex>
-       <HStack spacing={2} mb={4}><Button size="xs" colorScheme="purple" borderRadius="full">All templates</Button><Button size="xs" variant="outline" borderRadius="full">My team</Button><Button size="xs" variant="outline" borderRadius="full">Recently used</Button><Text ml="auto" fontSize="8px" color="gray.400">{filtered.length} results</Text></HStack>
+       <HStack spacing={2} mb={4}><Button size="xs" colorScheme="purple" borderRadius="full">All templates</Button><Button size="xs" variant="outline" borderRadius="full">My team</Button><Button size="xs" variant="outline" borderRadius="full">Recently used</Button><Text ml="auto" fontSize="8px" color="textSecondary">{filtered.length} results</Text></HStack>
        <Grid templateColumns={{base:'1fr',md:'1fr 1fr'}} gap={3}>
          {filtered.map((t,i)=><Box key={t.id} position="relative" p={2.5} border="1px solid" borderColor={selected?.id===t.id?'purple.300':'gray.200'} borderRadius="9px" cursor="pointer" onClick={()=>{setSelected(t);setPreviewValues({});}}>
            <Box bg={cardBg[i%cardBg.length]} borderRadius="7px" p={2.5} minH="62px">
-             <Flex justify="space-between"><Box><Box w="72px" h="6px" bg="white" borderRadius="full" mb={2}/><Box w="110px" h="6px" bg="white" borderRadius="full"/></Box><IconButton aria-label="favorite" size="xs" variant="ghost" icon={<FiStar/>} color={t.favorite?'purple.500':'gray.400'}/></Flex>
+             <Flex justify="space-between"><Box><Box w="72px" h="6px" bg="surface" borderRadius="full" mb={2}/><Box w="110px" h="6px" bg="surface" borderRadius="full"/></Box><IconButton aria-label="favorite" size="xs" variant="ghost" icon={<FiStar/>} color={t.favorite?'purple.500':'gray.400'}/></Flex>
            </Box>
            <Text fontSize="10px" fontWeight="800" mt={2}>{t.name}</Text>
-           <Text fontSize="8px" color="gray.500" noOfLines={1} mt={1}>Friendly greeting with clear next steps.</Text>
-           <Flex justify="space-between" align="center" mt={2}><HStack spacing={1}>{[t.category,t.channel||'Chat'].map(x=><Badge key={x} fontSize="6px" borderRadius="full" colorScheme="purple">{x}</Badge>)}</HStack><Text fontSize="7px" color="gray.400">{t.uses||0} uses</Text></Flex>
-           {selected?.id===t.id&&<HStack position="absolute" bottom="-18px" left="50%" transform="translateX(-50%)" bg="white" borderRadius="full" boxShadow="sm" p={1} zIndex={2}><IconButton aria-label="delete" size="xs" icon={<FiTrash2/>} colorScheme="red" variant="ghost"/><IconButton aria-label="edit" size="xs" icon={<FiEdit3/>} variant="ghost" onClick={e=>{e.stopPropagation();setEditing({...t})}}/><IconButton aria-label="use" size="xs" icon={<FiArrowRight/>} colorScheme="green" variant="ghost" onClick={e=>{e.stopPropagation();toast({title:'Template selected',status:'success'})}}/></HStack>}
+           <Text fontSize="8px" color="textSecondary" noOfLines={1} mt={1}>Friendly greeting with clear next steps.</Text>
+           <Flex justify="space-between" align="center" mt={2}><HStack spacing={1}>{[t.category,t.channel||'Chat'].map(x=><Badge key={x} fontSize="6px" borderRadius="full" colorScheme="purple">{x}</Badge>)}</HStack><Text fontSize="7px" color="textSecondary">{t.uses||0} uses</Text></Flex>
+           {selected?.id===t.id&&<HStack position="absolute" bottom="-18px" left="50%" transform="translateX(-50%)" bg="surface" borderRadius="full" boxShadow="sm" p={1} zIndex={2}><IconButton aria-label="delete" size="xs" icon={<FiTrash2/>} colorScheme="red" variant="ghost"/><IconButton aria-label="edit" size="xs" icon={<FiEdit3/>} variant="ghost" onClick={e=>{e.stopPropagation();setEditing({...t})}}/><IconButton aria-label="use" size="xs" icon={<FiArrowRight/>} colorScheme="green" variant="ghost" onClick={e=>{e.stopPropagation();toast({title:'Template selected',status:'success'})}}/></HStack>}
          </Box>)}
        </Grid>
      </Box>
 
-     <Box borderLeft="1px solid" borderColor="gray.200" p={4} bg="white">
-       <Text fontSize="8px" fontWeight="900" color="gray.500">PREVIEW</Text>
-       <Text fontSize="8px" color="gray.500" mt={1}>Review the selected reply before inserting.</Text>
+     <Box borderLeft="1px solid" borderColor="border" p={4} bg="surface">
+       <Text fontSize="8px" fontWeight="900" color="textSecondary">PREVIEW</Text>
+       <Text fontSize="8px" color="textSecondary" mt={1}>Review the selected reply before inserting.</Text>
        <Text fontSize="8px" fontWeight="800" mt={4} mb={1}>PREVIEW AS</Text>
        <Select size="sm" value={previewValues.customer_name||''} placeholder="New visitor" onChange={e=>setPreviewValues(v=>({...v,customer_name:e.target.value}))}><option value="Avery">Avery</option><option value="Taran">Taran</option><option value="Elena">Elena</option></Select>
        <Box mt={3} p={3} border="1px solid" borderColor="gray.100" borderRadius="8px">
-         <Text fontSize="8px" color="gray.500">Live preview</Text>
+         <Text fontSize="8px" color="textSecondary">Live preview</Text>
          <Box mt={2} bg="purple.50" borderRadius="8px" p={3}><Text fontSize="10px" lineHeight="1.5">{selected?resolved:'Select a template to preview.'}</Text></Box>
          <Button size="xs" w="100%" mt={3} variant="solid" onClick={()=>toast({title:'Preview opened',status:'info'})}>View getting started</Button>
        </Box>
        {vars.length>0&&<Box mt={4}>{vars.map(v=><Input key={v} size="xs" mb={2} value={previewValues[v]||''} placeholder={v} onChange={e=>setPreviewValues(p=>({...p,[v]:e.target.value}))}/>)}</Box>}
-       <Box mt={6} p={3} bg="green.50" borderRadius="8px"><Text fontSize="9px" fontWeight="800" color="green.700">✓ {vars.filter(v=>previewValues[v]).length} variables resolved</Text><Text fontSize="8px" color="gray.500">You can edit the message after inserting.</Text></Box>
+       <Box mt={6} p={3} bg="green.50" borderRadius="8px"><Text fontSize="9px" fontWeight="800" color="green.700">✓ {vars.filter(v=>previewValues[v]).length} variables resolved</Text><Text fontSize="8px" color="textSecondary">You can edit the message after inserting.</Text></Box>
        <Flex justify="end" gap={2} mt={4}><Button size="xs" variant="outline" onClick={()=>setSelected(null)}>Cancel</Button><Button size="xs" onClick={()=>toast({title:'Template ready to insert',status:'success'})}>Insert</Button></Flex>
      </Box>
    </Grid>
@@ -125,29 +125,29 @@ const Templates=()=>{
      <Grid templateColumns={{base:"1fr",md:"1.15fr .85fr"}} gap={{base:4,md:5}}>
       <Box>
        <Heading size="sm" mb={4}>Edit Template</Heading>
-       <Box bg="white" borderRadius="10px" p={{base:4,md:5}}>
+       <Box bg="surface" borderRadius="10px" p={{base:4,md:5}}>
         <VStack align="stretch" spacing={3}>
          <Box>
-          <Text fontSize="9px" color="gray.500" mb={1}>Name</Text>
+          <Text fontSize="9px" color="textSecondary" mb={1}>Name</Text>
           <Input size="sm" value={editing.name||''} placeholder="Template name" onChange={e=>setEditing({...editing,name:e.target.value})}/>
          </Box>
          <Box>
-          <Text fontSize="9px" color="gray.500" mb={1}>Title</Text>
+          <Text fontSize="9px" color="textSecondary" mb={1}>Title</Text>
           <Input size="sm" value={editing.title||editing.name||''} placeholder="Say Hi to welcome new visitors!" onChange={e=>setEditing({...editing,title:e.target.value})}/>
          </Box>
          <Box>
-          <Text fontSize="9px" color="gray.500" mb={1}>Category</Text>
+          <Text fontSize="9px" color="textSecondary" mb={1}>Category</Text>
           <Select size="sm" value={editing.category||'Chat'} onChange={e=>setEditing({...editing,category:e.target.value})}>
            {['Chat','Onboarding','Shipping','Returns','Billing','Engagement','Transaction'].map(x=><option key={x}>{x}</option>)}
           </Select>
          </Box>
          <Box>
-          <Text fontSize="9px" color="gray.500" mb={1}>Content</Text>
+          <Text fontSize="9px" color="textSecondary" mb={1}>Content</Text>
           <Textarea minH="90px" resize="vertical" value={editing.content||''} onChange={e=>setEditing({...editing,content:e.target.value})} placeholder="Hi {{customer_name}}! Welcome to {{company_name}}. How may I help today?"/>
-          <Flex align="center" gap={2} mt={1} color="gray.500" fontSize="9px" flexWrap="wrap">
+          <Flex align="center" gap={2} mt={1} color="textSecondary" fontSize="9px" flexWrap="wrap">
            <Text>↶</Text><Text>↷</Text><Text fontWeight="700">Sans Serif</Text><Text>•</Text><Text fontWeight="700">T</Text><Text>B</Text><Text fontStyle="italic">I</Text><Text textDecoration="underline">U</Text><Text>A</Text><Text>≡</Text><Text>☰</Text><Text>⋮</Text>
           </Flex>
-          <Text fontSize="8px" color="gray.500" mt={2}>Use variables in <b>{'{{variable_name}}'}</b> format. Detected: {varsFrom(editing.content).map(v=>'{{'+v+'}}').join(', ')||'none'}</Text>
+          <Text fontSize="8px" color="textSecondary" mt={2}>Use variables in <b>{'{{variable_name}}'}</b> format. Detected: {varsFrom(editing.content).map(v=>'{{'+v+'}}').join(', ')||'none'}</Text>
          </Box>
         </VStack>
         <Flex justify="space-between" align="center" mt={7} gap={2}>
@@ -158,9 +158,9 @@ const Templates=()=>{
       </Box>
       <Box>
        <Heading size="sm" mb={4}>Preview</Heading>
-       <Box bg="white" borderRadius="10px" p={4} minH="330px">
-        <Text fontSize="8px" color="gray.500" mb={2}>LIVE PREVIEW</Text>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="10px" p={3}>
+       <Box bg="surface" borderRadius="10px" p={4} minH="330px">
+        <Text fontSize="8px" color="textSecondary" mb={2}>LIVE PREVIEW</Text>
+        <Box border="1px solid" borderColor="border" borderRadius="10px" p={3}>
          <Flex align="center" gap={2} mb={2}>
           <Box w="18px" h="18px" borderRadius="full" bg="purple.100"/>
           <Badge colorScheme="purple" fontSize="7px">{editing.channel||'Chat'}</Badge>
