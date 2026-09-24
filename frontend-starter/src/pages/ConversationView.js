@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Textarea,Badge,Heading,Progress,Input,Icon,Tooltip,useToast,Modal,ModalOverlay,ModalContent,ModalBody} from '@chakra-ui/react';
-import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3} from 'react-icons/fi';
+import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3,FiStar} from 'react-icons/fi';
 import {useParams,useNavigate} from 'react-router-dom';
 import {useAppData} from '../context/AppDataContext';
 import {addMessage,interveneInConversation,releaseIntervention} from '../api';
@@ -64,5 +64,37 @@ const ConversationView=()=>{
    </Flex>
   </Box>
  </Flex>
+  <Modal isOpen={templateOpen} onClose={()=>setTemplateOpen(false)} size="5xl" isCentered>
+   <ModalOverlay bg="blackAlpha.500"/>
+   <ModalContent borderRadius="14px" overflow="hidden">
+    <ModalBody p={0}>
+     <Grid templateColumns="155px 1fr 245px" minH="500px">
+      <Box bg="gray.50" p={4} borderRight="1px solid" borderColor="gray.200">
+       <Text fontSize="9px" fontWeight="900" mb={3}>TEMPLATE LIBRARY</Text>
+       <Input size="sm" bg="white" value={templateSearch} onChange={e=>setTemplateSearch(e.target.value)} placeholder="Search categories"/>
+       {['All templates','Popular','Low use'].map((x,i)=><Box key={x} mt={3} p={2} borderRadius="6px" bg={i===0?'brand.50':'transparent'}><Text fontSize="9px" fontWeight={i===0?'800':'500'} color={i===0?'brand.700':'gray.600'}>● {x}</Text></Box>)}
+       <Text fontSize="8px" fontWeight="900" color="gray.500" mt={5}>BY JOURNEY</Text>
+       {['Onboarding','Billing','Engagement','Transaction'].map(x=><Text key={x} fontSize="9px" py={1.5}>● {x}</Text>)}
+       <Text fontSize="8px" fontWeight="900" color="gray.500" mt={4}>BY CHANNEL</Text>
+       {['Email','Website','Mobile','Messenger'].map(x=><Text key={x} fontSize="9px" py={1.5}>● {x}</Text>)}
+      </Box>
+      <Box p={4}>
+       <Flex justify="space-between" align="center" mb={2}><Box><Heading size="sm">Response Templates</Heading><Text fontSize="9px" color="gray.500">Choose a reply and customize it before inserting.</Text></Box><Badge>{visibleTemplates.length} results</Badge></Flex>
+       <Flex gap={2} mb={3}><Input size="sm" value={templateSearch} onChange={e=>setTemplateSearch(e.target.value)} placeholder="Search title, message, or tag"/><Select size="sm" w="105px"><option>All channels</option></Select><Select size="sm" w="100px"><option>Most used</option></Select></Flex>
+       <HStack mb={3}><Badge colorScheme="purple">All templates</Badge><Badge>My team</Badge><Badge>Recently used</Badge></HStack>
+       <Grid templateColumns="1fr 1fr" gap={3}>{visibleTemplates.map(t=><Box key={t.id} p={3} border="1px solid" borderColor={selectedTemplate.id===t.id?'brand.400':'gray.200'} borderRadius="9px" cursor="pointer" onClick={()=>setSelectedTemplate(t)} _hover={{borderColor:'brand.300'}}><Flex justify="space-between"><Box h="7px" w="70%" bg="gray.100" borderRadius="full"/>{t.favorite?<FiStar/>:<Text color="gray.300">☆</Text>}</Flex><Text fontSize="10px" fontWeight="800" mt={3}>{t.name}</Text><Text fontSize="8px" color="gray.500" noOfLines={2}>{t.content}</Text><HStack mt={2}><Badge fontSize="7px">{t.category}</Badge><Badge colorScheme="purple" fontSize="7px">{t.channel}</Badge></HStack></Box>)}</Grid>
+      </Box>
+      <Box p={4} borderLeft="1px solid" borderColor="gray.200">
+       <Text fontSize="9px" fontWeight="900">Preview</Text><Text fontSize="8px" color="gray.500">Review the selected reply before inserting.</Text>
+       <Text fontSize="8px" fontWeight="800" mt={4} mb={1}>PREVIEW AS</Text>
+       <Select size="sm" value={previewName} onChange={e=>setPreviewName(e.target.value)}><option>New visitor</option><option>Elena Vasquez</option><option>Marcus Lee</option></Select>
+       <Box mt={3} p={3} bg="gray.50" borderRadius="9px"><Badge mb={2} colorScheme="purple">Live preview</Badge><Text fontSize="9px" lineHeight="1.6">{resolvedTemplate}</Text><Button mt={3} size="xs" w="100%">View getting started</Button></Box>
+       <Box mt={4} p={3} bg="green.50" borderRadius="8px"><Text fontSize="9px" fontWeight="800" color="green.700">✓ {selectedTemplate?.vars?.length||0} variables resolved</Text><Text fontSize="8px" color="gray.600">You can edit the message after inserting.</Text></Box>
+       <Flex justify="end" gap={2} mt={5}><Button size="sm" variant="outline" onClick={()=>setTemplateOpen(false)}>Cancel</Button><Button size="sm" onClick={insertTemplate}>Insert</Button></Flex>
+      </Box>
+     </Grid>
+    </ModalBody>
+   </ModalContent>
+  </Modal>
 };
 export default ConversationView;
