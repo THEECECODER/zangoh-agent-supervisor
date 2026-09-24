@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Textarea,Badge,Heading,Progress,Input,Icon,Tooltip,useToast,Modal,ModalOverlay,ModalContent,ModalBody} from '@chakra-ui/react';
+import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Textarea,Badge,Heading,Progress,Input,Icon,Tooltip,useToast,Grid,Select,Modal,ModalOverlay,ModalContent,ModalBody} from '@chakra-ui/react';
 import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3,FiStar} from 'react-icons/fi';
 import {useParams,useNavigate} from 'react-router-dom';
 import {useAppData} from '../context/AppDataContext';
