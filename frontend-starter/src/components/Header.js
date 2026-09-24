@@ -1,136 +1,36 @@
-// src/components/Header.js
 import React from 'react';
-import {
-  Box,
-  Flex,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Avatar,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  useColorMode,
-  Button,
-  Badge,
-  Tooltip,
-} from '@chakra-ui/react';
-import { 
-  FiSearch, 
-  FiMenu, 
-  FiBell, 
-  FiMoon, 
-  FiSun,
-  FiUser,
-  FiSettings,
-  FiHelpCircle,
-} from 'react-icons/fi';
+import { Box, Flex, IconButton, Input, InputGroup, InputLeftElement, Avatar, Text, Badge, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { FiSearch, FiMenu, FiBell, FiMoon, FiUser } from 'react-icons/fi';
+import { useColorMode } from '@chakra-ui/react';
 
 const Header = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  
-  const bgColor = colorMode === 'dark' ? 'gray.800' : 'white';
-  const borderColor = colorMode === 'dark' ? 'gray.700' : 'gray.200';
-  
+  const {colorMode,toggleColorMode}=useColorMode();
   return (
-    <Box
-      as="header"
-      position="sticky"
-      top={0}
-      bg={bgColor}
-      borderBottom="1px"
-      borderColor={borderColor}
-      px={4}
-      py={2}
-      zIndex={10}
-      ml={{ base: 0, md: '250px' }}
-    >
-      <Flex justify="space-between" align="center">
-        <Flex align="center">
-          <IconButton
-            display={{ base: 'flex', md: 'none' }}
-            aria-label="Open menu"
-            icon={<FiMenu />}
-            variant="ghost"
-            mr={2}
-          />
-          <InputGroup maxW="400px">
-            <InputLeftElement pointerEvents="none">
-              <FiSearch color="gray.400" />
-            </InputLeftElement>
-            <Input placeholder="Search conversations or agents..." />
-          </InputGroup>
+    <Box position="fixed" top={0} left={0} right={0} h="58px" bg="brand.700" color="white" zIndex={30} boxShadow="0 1px 0 rgba(0,0,0,.08)">
+      <Flex h="100%" align="center" px={{base:4,md:6}} gap={5}>
+        <Flex w={{base:'auto',md:'206px'}} align="center" gap={3}>
+          <IconButton display={{base:'flex',md:'none'}} aria-label="menu" icon={<FiMenu/>} variant="ghost" color="white"/>
+          <Text fontWeight="800" letterSpacing=".2px">ABC Company</Text>
         </Flex>
-        
-        <Flex align="center">
-          <Tooltip label="Toggle color mode">
-            <IconButton
-              aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
-              icon={colorMode === 'light' ? <FiMoon /> : <FiSun />}
-              variant="ghost"
-              onClick={toggleColorMode}
-              mr={2}
-            />
-          </Tooltip>
-          
+        <InputGroup maxW="330px" display={{base:'none',md:'flex'}}>
+          <InputLeftElement><FiSearch/></InputLeftElement>
+          <Input placeholder="Search conversations, agents..." bg="rgba(255,255,255,.10)" border="1px solid rgba(255,255,255,.18)" color="white" _placeholder={{color:'purple.100'}} _focus={{bg:'white',color:'gray.800'}}/>
+        </InputGroup>
+        <Flex ml="auto" align="center" gap={1}>
+          <IconButton aria-label="theme" icon={colorMode==='light'?<FiMoon/>:<FiUser/>} variant="ghost" color="white" onClick={toggleColorMode}/>
+          <Box position="relative">
+            <IconButton aria-label="notifications" icon={<FiBell/>} variant="ghost" color="white"/>
+            <Badge position="absolute" top="0" right="-1" borderRadius="full" bg="red.400" color="white" fontSize="10px" px={1.5}>3</Badge>
+          </Box>
           <Menu>
-            <Tooltip label="Notifications">
-              <Box position="relative">
-                <MenuButton
-                  as={IconButton}
-                  aria-label="Notifications"
-                  icon={<FiBell />}
-                  variant="ghost"
-                  mr={2}
-                />
-                <Badge
-                  position="absolute"
-                  top="-5px"
-                  right="-5px"
-                  borderRadius="full"
-                  bg="red.500"
-                  color="white"
-                  fontSize="xs"
-                  w={4}
-                  h={4}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  3
-                </Badge>
-              </Box>
-            </Tooltip>
-            <MenuList>
-              <MenuItem>New alert: High priority conversation</MenuItem>
-              <MenuItem>Agent configuration updated</MenuItem>
-              <MenuItem>System maintenance scheduled</MenuItem>
-            </MenuList>
-          </Menu>
-          
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant="ghost"
-              rightIcon={<FiUser />}
-              borderRadius="md"
-              px={3}
-              py={2}
-            >
-              Supervisor
+            <MenuButton px={3} py={2} fontWeight="700" _hover={{bg:'rgba(255,255,255,.08)'}} borderRadius="md">
+              <Flex align="center" gap={2}><Text>Supervisor</Text><Avatar size="xs" name="Supervisor"/></Flex>
             </MenuButton>
-            <MenuList>
-              <MenuItem icon={<FiUser />}>Profile</MenuItem>
-              <MenuItem icon={<FiSettings />}>Settings</MenuItem>
-              <MenuItem icon={<FiHelpCircle />}>Help</MenuItem>
-            </MenuList>
+            <MenuList color="gray.800"><MenuItem>Profile</MenuItem><MenuItem>Settings</MenuItem><MenuItem>Sign out</MenuItem></MenuList>
           </Menu>
         </Flex>
       </Flex>
     </Box>
   );
 };
-
 export default Header;
