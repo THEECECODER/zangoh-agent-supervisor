@@ -19,6 +19,7 @@ const responseTemplateSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  channel: { type: String, default: 'Chat' },
   variables: [{
     name: String,
     description: String
