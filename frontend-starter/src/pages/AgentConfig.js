@@ -1,198 +1,24 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Select,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  Text,
-  VStack,
-  Checkbox,
-  HStack,
-  Input,
-  Tag,
-  TagLabel,
-  TagCloseButton,
-  useColorModeValue,
-} from '@chakra-ui/react';
+import React,{useEffect,useState} from 'react';
+import {Box,Flex,Grid,Heading,Text,Button,HStack,Select,Slider,SliderTrack,SliderFilledTrack,SliderThumb,Switch,Badge,Progress,useToast} from '@chakra-ui/react';
+import {FiSave,FiRotateCcw,FiPlay} from 'react-icons/fi';
+import {useAppData} from '../context/AppDataContext';
+import {updateAgentConfig} from '../api';
 
-const capabilitiesList = ['Decision Making', 'Autonomy', 'Learning', 'Perception'];
-
-const AgentConfig = () => {
-  const [selectedAgent, setSelectedAgent] = useState('CSR AI Agent');
-  const [topP, setTopP] = useState(0.7);
-  const [speed, setSpeed] = useState(0.5);
-  const [personality, setPersonality] = useState(0.5);
-  const [stability, setStability] = useState(0.5);
-  const [maxTokens, setMaxTokens] = useState(10);
-  const [capabilities, setCapabilities] = useState(['Decision Making', 'Perception']);
-  const [kbAccess, setKbAccess] = useState({
-    permissions: false,
-    internal: true,
-    public: true,
-  });
-  const [escalationMinutes, setEscalationMinutes] = useState(10);
-
-  const toggleCapability = (capability) => {
-    setCapabilities((prev) =>
-      prev.includes(capability)
-        ? prev.filter((c) => c !== capability)
-        : [...prev, capability]
-    );
-  };
-
-  const handleReset = () => {
-    setTopP(0.7);
-    setSpeed(0.5);
-    setPersonality(0.5);
-    setStability(0.5);
-    setMaxTokens(10);
-    setCapabilities(['Decision Making', 'Perception']);
-    setKbAccess({ permissions: false, internal: true, public: true });
-    setEscalationMinutes(10);
-  };
-
-  const handleSave = () => {
-    console.log('Saved configuration:', {
-      selectedAgent,
-      topP,
-      speed,
-      personality,
-      stability,
-      maxTokens,
-      capabilities,
-      kbAccess,
-      escalationMinutes,
-    });
-  };
-
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-
-  return (
-    <Box p={10} maxW="1000px" mx="auto">
-      <Flex justify="space-between" align="center" mb={8}>
-        <Heading fontSize="2xl">Configure your AI Agent</Heading>
-        <HStack>
-          <Button variant="outline" onClick={handleReset}>Reset</Button>
-          <Button colorScheme="purple" onClick={handleSave}>Save Changes</Button>
-        </HStack>
-      </Flex>
-
-      <Box
-        bg={cardBg}
-        p={8}
-        borderRadius="xl"
-        boxShadow="lg"
-        border={`1px solid ${borderColor}`}
-      >
-        <Box mb={8}>
-          <Text fontSize="lg" fontWeight="semibold" mb={2}>Agent</Text>
-          <Select size="lg" value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)} maxW="300px">
-            <option>CSR AI Agent</option>
-            <option>Sales AI Agent</option>
-            <option>Support AI Agent</option>
-          </Select>
-        </Box>
-
-        <Flex flexWrap="wrap" gap={8} mb={8}>
-          {[
-            { label: 'Top-p', value: topP, setter: setTopP },
-            { label: 'Speed', value: speed, setter: setSpeed },
-            { label: 'Personality', value: personality, setter: setPersonality },
-            { label: 'Stability', value: stability, setter: setStability },
-          ].map(({ label, value, setter }) => (
-            <Box key={label} flex="1" minW="220px">
-              <Text fontSize="md" mb={2}>{label}</Text>
-              <Slider value={value} onChange={setter} min={0} max={1} step={0.01}>
-                <SliderTrack>
-                  <SliderFilledTrack bg="purple.500" />
-                </SliderTrack>
-                <SliderThumb />
-              </Slider>
-              <Text fontSize="sm" color="gray.600" mt={1}>{value.toFixed(2)}</Text>
-            </Box>
-          ))}
-
-          <Box>
-            <Text fontSize="md" mb={2}>Max Tokens</Text>
-            <Input
-              type="number"
-              value={maxTokens}
-              size="lg"
-              onChange={(e) => setMaxTokens(Number(e.target.value))}
-              w="100px"
-            />
-          </Box>
-        </Flex>
-
-        <Box mb={8}>
-          <Text fontSize="lg" fontWeight="semibold" mb={2}>Capabilities</Text>
-          <HStack spacing={4} wrap="wrap">
-            {capabilitiesList.map((cap) => {
-              const isActive = capabilities.includes(cap);
-              return (
-                <Tag
-                  size="lg"
-                  variant={isActive ? 'solid' : 'outline'}
-                  colorScheme="purple"
-                  cursor="pointer"
-                  onClick={() => toggleCapability(cap)}
-                  key={cap}
-                >
-                  <TagLabel>{cap}</TagLabel>
-                  {isActive && <TagCloseButton />}
-                </Tag>
-              );
-            })}
-          </HStack>
-        </Box>
-
-        <Box mb={8}>
-          <Text fontSize="lg" fontWeight="semibold" mb={2}>Knowledge Base Access</Text>
-          <VStack align="start" spacing={3}>
-            <Checkbox
-              isChecked={kbAccess.permissions}
-              onChange={() => setKbAccess({ ...kbAccess, permissions: !kbAccess.permissions })}
-            >
-              Permissions
-            </Checkbox>
-            <Checkbox
-              isChecked={kbAccess.internal}
-              onChange={() => setKbAccess({ ...kbAccess, internal: !kbAccess.internal })}
-            >
-              Internal Articles
-            </Checkbox>
-            <Checkbox
-              isChecked={kbAccess.public}
-              onChange={() => setKbAccess({ ...kbAccess, public: !kbAccess.public })}
-            >
-              Public Articles
-            </Checkbox>
-          </VStack>
-        </Box>
-
-        <Box>
-          <Text fontSize="lg" fontWeight="semibold" mb={2}>Escalation Threshold</Text>
-          <Flex align="center" gap={2}>
-            <Text>Escalate if Agent hasn’t responded in</Text>
-            <Input
-              type="number"
-              size="lg"
-              value={escalationMinutes}
-              onChange={(e) => setEscalationMinutes(Number(e.target.value))}
-              width="80px"
-            />
-            <Text>minutes</Text>
-          </Flex>
-        </Box>
-      </Box>
-    </Box>
-  );
+const AgentConfig=()=>{
+ const {agents}=useAppData(); const [idx,setIdx]=useState(0),[temp,setTemp]=useState(.7),[topP,setTopP]=useState(.8),[tokens,setTokens]=useState(150),[threshold,setThreshold]=useState(.65),[saving,setSaving]=useState(false),toast=useToast();
+ const agent=agents[idx];
+ useEffect(()=>{if(agent){setTemp(agent.parameters?.temperature??.7);setTopP(agent.parameters?.top_p??.8);setTokens(agent.parameters?.max_tokens??150);setThreshold(agent.escalationThresholds?.lowConfidence??.65)}},[agent]);
+ const save=async()=>{if(!agent)return;setSaving(true);try{await updateAgentConfig(agent.id,{parameters:{temperature:temp,top_p:topP,max_tokens:tokens},escalationThresholds:{lowConfidence:threshold}});toast({title:'Agent configuration saved',status:'success'});}catch(e){toast({title:'Could not save configuration',status:'error'});}finally{setSaving(false)}};
+ const reset=()=>{setTemp(agent?.parameters?.temperature??.7);setTopP(agent?.parameters?.top_p??.8);setTokens(agent?.parameters?.max_tokens??150);setThreshold(agent?.escalationThresholds?.lowConfidence??.65)};
+ return <Box>
+  <Flex justify="space-between" align="center" mb={5}><Box><Text fontSize="11px" color="gray.500" fontWeight="800">AI AGENT CONTROL ROOM</Text><Heading size="lg">{agent?.name||'CSR AI Agent'}</Heading><Text color="gray.500">Tune behavior, guardrails, escalation and capabilities.</Text></Box><HStack><Button size="sm" variant="outline" leftIcon={<FiRotateCcw/>} onClick={reset}>Reset</Button><Button size="sm" leftIcon={<FiSave/>} isLoading={saving} onClick={save}>Save changes</Button></HStack></Flex>
+  <Grid templateColumns={{base:'1fr',xl:'1.1fr 1.5fr 1fr'}} gap={4}>
+   <Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" p={5}><Flex justify="space-between" mb={5}><Heading size="sm">Behavior configuration</Heading><Select w="160px" value={idx} onChange={e=>setIdx(Number(e.target.value))}>{agents.map((a,i)=><option key={a.id} value={i}>{a.name}</option>)}</Select></Flex>
+    {[['Temperature',temp,setTemp,'Creativity'],['Top-p',topP,setTopP,'Response diversity']].map(([n,v,s,d])=><Box mb={6} key={n}><Flex justify="space-between"><Text fontWeight="700" fontSize="12px">{n}</Text><Badge>{v.toFixed(2)}</Badge></Flex><Slider mt={2} value={v} onChange={s} min={0} max={1} step={.01}><SliderTrack><SliderFilledTrack/></SliderTrack><SliderThumb/></Slider><Text fontSize="10px" color="gray.500">{d}</Text></Box>)}<Box mb={6}><Flex justify="space-between"><Text fontWeight="700" fontSize="12px">Max output tokens</Text><Badge>{tokens}</Badge></Flex><Slider mt={2} value={tokens} onChange={setTokens} min={50} max={500} step={10}><SliderTrack><SliderFilledTrack/></SliderTrack><SliderThumb/></Slider></Box><Divider/><Text mt={5} mb={3} fontSize="11px" fontWeight="800">Escalation policy</Text><Flex justify="space-between"><Text fontSize="11px">Minimum confidence</Text><Badge colorScheme="orange">{Math.round(threshold*100)}%</Badge></Flex><Slider mt={2} value={threshold} onChange={setThreshold} min={.2} max={.95} step={.01}><SliderTrack><SliderFilledTrack/></SliderTrack><SliderThumb/></Slider><Text fontSize="10px" color="gray.500">Escalate when confidence falls below this threshold.</Text>
+   </Box>
+   <Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" p={5}><Heading size="sm">Performance & guardrails</Heading><Text fontSize="10px" color="gray.500" mb={5}>Current operational signals</Text><Grid templateColumns="1fr 1fr" gap={3} mb={5}>{[['Resolution rate','74.6%'],['CSAT','88.0%'],['Escalation rate','11.2%'],['Policy violations','0.7%']].map(([a,b])=><Box key={a} p={3} bg="gray.50" borderRadius="8px"><Text fontSize="10px" color="gray.500">{a}</Text><Text fontWeight="800" fontSize="18px" mt={1}>{b}</Text></Box>)}</Grid>{[['Policy adherence',92,'green'],['Empathy & tone',86,'green'],['Response accuracy',79,'orange'],['Escalation safety',96,'green']].map(([a,v,c])=><Box mb={4} key={a}><Flex justify="space-between" fontSize="10px"><Text>{a}</Text><Text>{v}%</Text></Flex><Progress mt={1} value={v} colorScheme={c} size="xs"/></Box>)}<Heading size="xs" mt={6} mb={3}>Capabilities</Heading>{(agent?.capabilities||[]).map(c=><Flex key={c.id} justify="space-between" py={2} borderBottom="1px solid" borderColor="gray.100"><Text fontSize="11px">{c.name}</Text><Switch size="sm" isChecked={c.enabled} onChange={()=>toast({title:'Capability toggle ready to save',status:'info'})}/></Flex>)}</Box>
+   <Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" p={5}><Flex justify="space-between"><Heading size="sm">Simulation console</Heading><Badge colorScheme="green">Simulate</Badge></Flex><Box mt={4} p={3} bg="gray.50" borderRadius="8px"><Text fontSize="10px" color="gray.500">CUSTOMER</Text><Text fontSize="11px" mt={1}>“I was charged twice and need this fixed today.”</Text></Box><Box mt={3} p={3} bg="brand.50" borderRadius="8px"><Text fontSize="10px" color="gray.500">AGENT RESPONSE</Text><Text fontSize="11px" mt={1}>“I can help investigate the duplicate charge and explain the next steps.”</Text></Box><Button mt={3} size="sm" w="100%" leftIcon={<FiPlay/>} onClick={()=>toast({title:'Simulation completed',description:'Policy and escalation checks passed.',status:'success'})}>Run simulation</Button><Divider my={5}/><Heading size="xs" mb={3}>Decision trace</Heading>{['Intent: billing dispute','Policy match: duplicate charge','Confidence: 91%','Escalation: not required'].map(x=><Text key={x} fontSize="10px" py={1.5} borderBottom="1px solid" borderColor="gray.100">{x}</Text>)}<Box mt={4} p={3} bg="green.50" borderRadius="8px"><Text fontSize="11px" fontWeight="800" color="green.700">PASS · 92/100</Text><Text fontSize="10px" color="gray.600">No critical policy violations detected.</Text></Box></Box>
+  </Grid>
+ </Box>
 };
-
 export default AgentConfig;
