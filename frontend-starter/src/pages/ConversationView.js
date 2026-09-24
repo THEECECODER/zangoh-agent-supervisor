@@ -3,7 +3,7 @@ import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Textarea,Badge,Heading
 import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3,FiStar,FiMic,FiMicOff} from 'react-icons/fi';
 import {useParams,useNavigate} from 'react-router-dom';
 import {useAppData} from '../context/AppDataContext';
-import {addMessage,interveneInConversation,releaseIntervention} from '../api';
+import {addMessage,interveneInConversation,releaseIntervention,getTemplates} from '../api';
 
 const demo=[
  {id:'demo-1',customer:{name:'Elena Vasquez'},tags:['Refund blocked'],alertLevel:'high',status:'escalated',messages:[
@@ -17,7 +17,7 @@ const demo=[
  {id:'demo-4',customer:{name:'Ava Thompson'},tags:['Product defect'],alertLevel:'low',status:'active',messages:[{sender:'customer',text:'The product arrived with a defect.'}]}
 ];
 
-const templates=[
+const fallbackTemplates=[
  {id:1,name:'Welcome new visitor',category:'Onboarding',channel:'Website',content:'Welcome, {{customer_name}} 👋 Thanks for visiting Acme. How can I help you today?',vars:['customer_name'],favorite:true},
  {id:2,name:'Product tour invite',category:'Onboarding',channel:'Messenger',content:'Hi {{customer_name}}, I’d love to show you around the product. Would you like a quick tour?',vars:['customer_name'],favorite:false},
  {id:3,name:'Getting started checklist',category:'Onboarding',channel:'Email',content:'Here is your getting started checklist, {{customer_name}}. Let me know if you need help.',vars:['customer_name'],favorite:false},
@@ -25,8 +25,9 @@ const templates=[
 ];
 
 const ConversationView=()=>{
- const {id}=useParams(); const nav=useNavigate(); const {conversations}=useAppData(); const toast=useToast();
+ const {id}=useParams(); const nav=useNavigate(); const {conversations}=useAppData(); const toast=useToast(); const [templates,setTemplates]=useState(fallbackTemplates);
  const [conv,setConv]=useState(null),[taken,setTaken]=useState(false),[text,setText]=useState(''),[notes,setNotes]=useState('');
+ useEffect(()=>{getTemplates().then(data=>{if(data?.length)setTemplates(data.map(t=>({...t,vars:(t.variables||[]).map(v=>v.name)})));}).catch(()=>{});},[]);
  const [templateOpen,setTemplateOpen]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[selectedTemplate,setSelectedTemplate]=useState(templates[0]),[previewName,setPreviewName]=useState('New visitor'),[variableValues,setVariableValues]=useState({customer_name:'Avery'}),[listening,setListening]=useState(false);
  const visibleTemplates=templates.filter(t=>t.name.toLowerCase().includes(templateSearch.toLowerCase())||t.category.toLowerCase().includes(templateSearch.toLowerCase()));
  const resolvedTemplate=(selectedTemplate?.content||'').replace(/{{\\s*([a-zA-Z_][\\w]*)\\s*}}/g,(_,name)=>variableValues[name] || `[${name}]`);
