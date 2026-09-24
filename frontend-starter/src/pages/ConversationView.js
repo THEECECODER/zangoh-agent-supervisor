@@ -52,8 +52,26 @@ const ConversationView=()=>{
  const release=async()=>{try{await releaseIntervention(conv.id||conv._id,notes);setTaken(false);toast({title:'Control returned to AI',status:'success'});}catch(e){setTaken(false);toast({title:'AI control restored',status:'success'});}};
  const select=(c)=>nav('/conversation/'+(c.id||c._id));
  return <><Flex h="calc(100vh - 0px)" minH="700px" bg="gray.50" overflow="hidden">
-  <Box w="58px" bg="white" borderRight="1px solid" borderColor="gray.200" display={{base:'none',md:'flex'}} flexDir="column" alignItems="center" py={5} gap={4}>
-   <Icon as={FiHome} boxSize={4} color="gray.600"/><Icon as={FiMessageSquare} boxSize={4} color="brand.600"/><Icon as={FiBriefcase} boxSize={4} color="gray.600"/><Icon as={FiZap} boxSize={4} color="gray.600"/><Box flex="1"/><Icon as={FiSettings} boxSize={4} color="gray.600"/>
+  <Box w="58px" bg="white" borderRight="1px solid" borderColor="gray.200" display={{base:'none',md:'flex'}} flexDir="column" alignItems="center" py={5} gap={3}>
+   {[
+    {label:'Dashboard',path:'/',icon:FiHome},
+    {label:'Conversations',path:'/conversations',icon:FiMessageSquare},
+    {label:'AI Agents',path:'/agent-config',icon:FiBriefcase},
+    {label:'Templates',path:'/templates',icon:FiZap}
+   ].map(item=>{
+    const active=item.path==='/'?window.location.pathname==='/':window.location.pathname.startsWith(item.path);
+    return <Tooltip key={item.path} label={item.label} placement="right">
+      <Box as="button" type="button" aria-label={item.label} w="34px" h="34px" borderRadius="7px" display="flex" alignItems="center" justifyContent="center" bg={active?'brand.50':'transparent'} color={active?'brand.600':'gray.600'} _hover={{bg:'gray.50',color:'brand.600'}} onClick={()=>nav(item.path)}>
+       <Icon as={item.icon} boxSize={4}/>
+      </Box>
+    </Tooltip>
+   })}
+   <Box flex="1"/>
+   <Tooltip label="Settings" placement="right">
+    <Box as="button" type="button" aria-label="Settings" w="34px" h="34px" borderRadius="7px" display="flex" alignItems="center" justifyContent="center" color="gray.600" _hover={{bg:'gray.50',color:'brand.600'}} onClick={()=>nav('/settings')}>
+     <Icon as={FiSettings} boxSize={4}/>
+    </Box>
+   </Tooltip>
   </Box>
   <Box w={{base:'230px',lg:'245px'}} bg="white" borderRight="1px solid" borderColor="gray.200" p={3} display={{base:'none',md:'block'}}>
    <Text fontSize="10px" fontWeight="800" color="gray.500" mb={2}>CUSTOMER CONVERSATIONS</Text>
