@@ -1,91 +1,29 @@
-// src/pages/ConversationView.js
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Flex,
-  Text,
-  Button,
-  VStack,
-  HStack,
-  Avatar,
-  Divider,
-} from '@chakra-ui/react';
-import { useParams } from 'react-router-dom';
-import { useAppData } from '../context/AppDataContext';
+import React,{useEffect,useState} from 'react';
+import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Input,Textarea,Badge,Heading,Progress,SimpleGrid,useToast} from '@chakra-ui/react';
+import {useParams} from 'react-router-dom';
+import {FiArrowLeft,FiShield,FiSend,FiFileText,FiCheckCircle} from 'react-icons/fi';
+import {useAppData} from '../context/AppDataContext';
+import {addMessage,interveneInConversation,releaseIntervention} from '../api';
 
-const ConversationView = () => {
-  const { id } = useParams();
-  const { conversations, interveneInConversation } = useAppData();
-  const [conversation, setConversation] = useState(null);
-
-  useEffect(() => {
-    const conv = conversations.find(conv => conv.id === id || conv._id === id);
-    setConversation(conv);
-  }, [conversations, id]);
-
-  if (!conversation) {
-    return <Text p={4}>Loading conversation...</Text>;
-  }
-
-  const handleIntervene = () => {
-    interveneInConversation(conversation.id || conversation._id);
-  };
-
-  return (
-    <Flex p={4} gap={4}>
-      {/* Chat Area */}
-      <Box flex="2" bg="white" borderRadius="xl" boxShadow="md" p={4}>
-        <Text fontSize="xl" mb={2} fontWeight="bold">
-          Conversation
-        </Text>
-        <VStack align="start" spacing={3} maxHeight="70vh" overflowY="auto">
-          {conversation.messages.map((msg, index) => (
-            <Box
-              key={index}
-              alignSelf={msg.sender === 'agent' ? 'flex-end' : 'flex-start'}
-              bg={msg.sender === 'agent' ? 'blue.100' : 'gray.100'}
-              p={3}
-              borderRadius="md"
-              maxWidth="75%"
-            >
-              <Text fontWeight="medium">{msg.sender.toUpperCase()}</Text>
-              <Text>{msg.text}</Text>
-            </Box>
-          ))}
-        </VStack>
-        <Button mt={4} colorScheme="red" onClick={handleIntervene}>
-          Intervene
-        </Button>
-      </Box>
-
-      {/* Sidebar */}
-      <Box flex="1" bg="gray.50" borderRadius="xl" boxShadow="md" p={4}>
-        <Text fontSize="lg" fontWeight="bold">
-          Customer Info
-        </Text>
-        <HStack mt={3} mb={3}>
-          <Avatar name={conversation.customer} />
-          <Box>
-            <Text>{conversation.customer.name}</Text>
-            <Text fontSize="sm" color="gray.600">
-              {conversation.customer.email}
-            </Text>
-          </Box>
-        </HStack>
-        <Divider my={2} />
-        <Text fontSize="lg" fontWeight="bold">
-          Performance Metrics
-        </Text>
-        <VStack align="start" mt={2}>
-          <Text>Response Time: {conversation.metrics.responseTime} sec</Text>
-          <Text>Resolution Rate: {conversation.metrics.resolutionRate}%</Text>
-          <Text>
-            Customer Satisfaction: {conversation.metrics.csatScore}/5
-          </Text>
-        </VStack>
-      </Box>
-    </Flex>
-  );
+const ConversationView=()=>{
+ const {id}=useParams(); const {conversations}=useAppData(); const toast=useToast();
+ const [conv,setConv]=useState(null),[taken,setTaken]=useState(false),[text,setText]=useState(''),[notes,setNotes]=useState('');
+ useEffect(()=>setConv(conversations.find(c=>c.id===id||c._id===id)),[conversations,id]);
+ if(!conv)return <Box p={8}><Text>Loading conversation...</Text></Box>;
+ const send=async()=>{if(!text.trim())return; try{const data=await addMessage(conv.id||conv._id,{sender:'supervisor',text:text.trim()});setConv({...conv,messages:data.messages||[...(conv.messages||[]),{sender:'supervisor',text:text.trim()}]});setText('');toast({title:'Supervisor message sent',status:'success',duration:1800});}catch(e){toast({title:'Could not send message',status:'error'});}};
+ const take=async()=>{try{await interveneInConversation(conv.id||conv._id,'supervisor-01',notes);setTaken(true);toast({title:'Control taken over',status:'success'});}catch(e){toast({title:e.response?.data?.message||'Takeover failed',status:'error'});}};
+ const release=async()=>{try{await releaseIntervention(conv.id||conv._id,notes);setTaken(false);toast({title:'Control returned to AI',status:'success'});}catch(e){toast({title:e.response?.data?.message||'Release failed',status:'error'});}};
+ return <Box>
+  <Flex align="center" gap={2} mb={4}><Button as="a" href="/" variant="ghost" size="sm" leftIcon={<FiArrowLeft/>}>Dashboard</Button><Text color="gray.400">/</Text><Text fontWeight="700">{conv.customer?.name||'Customer'} · Case</Text><Badge ml={2} colorScheme={conv.alertLevel==='high'?'red':'orange'}>{conv.alertLevel||'medium'} alert</Badge></Flex>
+  <Flex gap={4} align="stretch" direction={{base:'column',xl:'row'}}>
+   <Box flex="1.8" bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" overflow="hidden">
+    <Flex p={4} borderBottom="1px solid" borderColor="gray.200" justify="space-between"><HStack><Avatar size="sm" name={conv.customer?.name}/><Box><Text fontWeight="800">{conv.customer?.name||'Customer'}</Text><Text fontSize="10px" color="gray.500">Conversation {conv.id}</Text></Box></HStack><HStack>{taken?<Button size="sm" colorScheme="orange" onClick={release}>Return control to AI</Button>:<Button size="sm" leftIcon={<FiShield/>} onClick={take}>Take over</Button>}</HStack></Flex>
+    <Box px={5} py={3} bg="orange.50" borderBottom="1px solid" borderColor="orange.100"><Text fontSize="11px" fontWeight="700">Supervisor attention recommended</Text><Text fontSize="10px" color="gray.600">Review the latest response and customer sentiment before continuing.</Text></Box>
+    <VStack p={5} spacing={4} align="stretch" maxH="430px" overflowY="auto">{(conv.messages||[]).map((m,i)=><Flex key={i} justify={m.sender==='customer'?'start':'end'}><Box maxW="72%" bg={m.sender==='customer'?'gray.100':m.sender==='supervisor'?'brand.50':'purple.50'} p={3} borderRadius="10px"><Text fontSize="9px" color="gray.500" fontWeight="700" mb={1}>{m.sender.toUpperCase()}</Text><Text fontSize="13px">{m.text}</Text></Box></Flex>)}</VStack>
+    <Divider/><Box p={4}><Flex justify="space-between" mb={2}><Text fontSize="11px" fontWeight="800">Supervisor response</Text><Badge colorScheme={taken?'green':'gray'}>{taken?'CONTROL ACTIVE':'AI CONTROL'}</Badge></Flex><Textarea value={text} onChange={e=>setText(e.target.value)} placeholder={taken?'Type a response as supervisor...':'Take over the conversation to send a supervisor response.'} isDisabled={!taken} rows={3}/><Flex justify="space-between" mt={2}><Button size="xs" variant="outline" leftIcon={<FiFileText/>} isDisabled={!taken} onClick={()=>setText('Hi '+(conv.customer?.name||'there')+', I’m reviewing your case personally and will help get this resolved.')}>Use template</Button><Button size="sm" leftIcon={<FiSend/>} isDisabled={!taken||!text.trim()} onClick={send}>Send message</Button></Flex></Box>
+   </Box>
+   <Box w={{base:'100%',xl:'310px'}} bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" p={4}><Heading size="sm">Customer intelligence</Heading><HStack mt={3} mb={4}><Avatar size="sm" name={conv.customer?.name}/><Box><Text fontWeight="700" fontSize="13px">{conv.customer?.name}</Text><Text fontSize="10px" color="gray.500">{conv.customer?.email||'Customer profile'}</Text></Box></HStack><SimpleGrid columns={2} spacing={3} mb={5}><Box><Text fontSize="10px" color="gray.500">Response time</Text><Text fontWeight="800">{conv.metrics?.responseTime||'6.2'}s</Text></Box><Box><Text fontSize="10px" color="gray.500">Confidence</Text><Text fontWeight="800">{Math.round((conv.metrics?.confidenceScore||.88)*100)}%</Text></Box><Box><Text fontSize="10px" color="gray.500">Sentiment</Text><Text fontWeight="800">{Math.round((conv.metrics?.sentiment||.82)*100)}%</Text></Box><Box><Text fontSize="10px" color="gray.500">Messages</Text><Text fontWeight="800">{conv.messages?.length||0}</Text></Box></SimpleGrid><Text fontSize="11px" fontWeight="800" mb={3}>Case diagnostics</Text>{[['Customer sentiment',88,'green'],['Policy confidence',74,'orange'],['Agent confidence',91,'green']].map(([n,v,c])=><Box mb={4} key={n}><Flex justify="space-between" fontSize="10px"><Text>{n}</Text><Text>{v}%</Text></Flex><Progress mt={1} value={v} size="xs" colorScheme={c}/></Box>)}<Text fontSize="11px" fontWeight="800" mt={5} mb={2}>Supervisor notes</Text><Textarea rows={5} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Add context for the next supervisor or agent..."/><Button mt={3} w="100%" size="sm" variant="outline" leftIcon={<FiCheckCircle/>} onClick={()=>toast({title:'Notes saved locally for this session',status:'success'})}>Save notes</Button></Box>
+  </Flex>
+ </Box>
 };
-
 export default ConversationView;
