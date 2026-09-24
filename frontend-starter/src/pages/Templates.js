@@ -120,16 +120,61 @@ const Templates=()=>{
      </Box>
    </Grid>
 
-   {editing&&<Box position="fixed" inset={0} bg="blackAlpha.500" zIndex={50} display="flex" alignItems="center" justifyContent="center" p={4}>
-    <Box bg="white" borderRadius="12px" w="min(720px,100%)" p={6} boxShadow="2xl">
-     <Flex justify="space-between" mb={5}><Heading size="md">{editing.id?'Edit Template':'Create Template'}</Heading><Button size="sm" variant="ghost" onClick={()=>setEditing(null)}><FiX/></Button></Flex>
-     <Grid templateColumns={{base:'1fr',md:'1fr 1fr'}} gap={4}>
-      <Box><Text fontSize="11px" fontWeight="700">Name</Text><Input value={editing.name} onChange={e=>setEditing({...editing,name:e.target.value})}/><Text fontSize="11px" fontWeight="700" mt={3}>Category</Text><Select value={editing.category} onChange={e=>setEditing({...editing,category:e.target.value})}>{['Onboarding','Shipping','Returns','Billing','Engagement','Transaction'].map(x=><option key={x}>{x}</option>)}</Select><Text fontSize="11px" fontWeight="700" mt={3}>Channel</Text><Select value={editing.channel} onChange={e=>setEditing({...editing,channel:e.target.value})}>{['Chat','Email','Website','Mobile','Messenger'].map(x=><option key={x}>{x}</option>)}</Select><Checkbox mt={4} isChecked={!!editing.isShared} onChange={e=>setEditing({...editing,isShared:e.target.checked})}>Share with team</Checkbox></Box>
-      <Box><Text fontSize="11px" fontWeight="700">Content</Text><Textarea h="180px" value={editing.content} onChange={e=>setEditing({...editing,content:e.target.value})} placeholder="Use variables like {{customer_name}} or {{order_id}}"/><Text fontSize="10px" color="gray.500" mt={2}>Detected: {varsFrom(editing.content).map(v=>'{{'+v+'}}').join(', ')||'none'}</Text></Box>
+   {editing&&<Box position="fixed" inset={0} bg="blackAlpha.500" zIndex={50} display="flex" alignItems="center" justifyContent="center" p={{base:2,md:4}}>
+    <Box bg="#f4f2f8" borderRadius="18px" w="min(820px,100%)" maxH="94vh" overflow="auto" p={{base:4,md:5}} boxShadow="2xl">
+     <Grid templateColumns={{base:"1fr",md:"1.15fr .85fr"}} gap={{base:4,md:5}}>
+      <Box>
+       <Heading size="sm" mb={4}>Edit Template</Heading>
+       <Box bg="white" borderRadius="10px" p={{base:4,md:5}}>
+        <VStack align="stretch" spacing={3}>
+         <Box>
+          <Text fontSize="9px" color="gray.500" mb={1}>Name</Text>
+          <Input size="sm" value={editing.name||''} placeholder="Template name" onChange={e=>setEditing({...editing,name:e.target.value})}/>
+         </Box>
+         <Box>
+          <Text fontSize="9px" color="gray.500" mb={1}>Title</Text>
+          <Input size="sm" value={editing.title||editing.name||''} placeholder="Say Hi to welcome new visitors!" onChange={e=>setEditing({...editing,title:e.target.value})}/>
+         </Box>
+         <Box>
+          <Text fontSize="9px" color="gray.500" mb={1}>Category</Text>
+          <Select size="sm" value={editing.category||'Chat'} onChange={e=>setEditing({...editing,category:e.target.value})}>
+           {['Chat','Onboarding','Shipping','Returns','Billing','Engagement','Transaction'].map(x=><option key={x}>{x}</option>)}
+          </Select>
+         </Box>
+         <Box>
+          <Text fontSize="9px" color="gray.500" mb={1}>Content</Text>
+          <Textarea minH="90px" resize="vertical" value={editing.content||''} onChange={e=>setEditing({...editing,content:e.target.value})} placeholder="Hi {{customer_name}}! Welcome to {{company_name}}. How may I help today?"/>
+          <Flex align="center" gap={2} mt={1} color="gray.500" fontSize="9px" flexWrap="wrap">
+           <Text>↶</Text><Text>↷</Text><Text fontWeight="700">Sans Serif</Text><Text>•</Text><Text fontWeight="700">T</Text><Text>B</Text><Text fontStyle="italic">I</Text><Text textDecoration="underline">U</Text><Text>A</Text><Text>≡</Text><Text>☰</Text><Text>⋮</Text>
+          </Flex>
+          <Text fontSize="8px" color="gray.500" mt={2}>Use variables in <b>{'{{variable_name}}'}</b> format. Detected: {varsFrom(editing.content).map(v=>'{{'+v+'}}').join(', ')||'none'}</Text>
+         </Box>
+        </VStack>
+        <Flex justify="space-between" align="center" mt={7} gap={2}>
+         <Button size="sm" borderRadius="full" onClick={()=>setEditing({...editing,isShared:!editing.isShared})}>{editing.isShared?'Share with Team ✓':'Share with Team'}</Button>
+         <HStack><Button size="sm" variant="ghost" bg="gray.100" borderRadius="full" onClick={()=>setEditing(null)}>Cancel</Button><Button size="sm" borderRadius="full" onClick={save}>Save</Button></HStack>
+        </Flex>
+       </Box>
+      </Box>
+      <Box>
+       <Heading size="sm" mb={4}>Preview</Heading>
+       <Box bg="white" borderRadius="10px" p={4} minH="330px">
+        <Text fontSize="8px" color="gray.500" mb={2}>LIVE PREVIEW</Text>
+        <Box border="1px solid" borderColor="gray.200" borderRadius="10px" p={3}>
+         <Flex align="center" gap={2} mb={2}>
+          <Box w="18px" h="18px" borderRadius="full" bg="purple.100"/>
+          <Badge colorScheme="purple" fontSize="7px">{editing.channel||'Chat'}</Badge>
+         </Flex>
+         <Text fontSize="10px" lineHeight="1.6">{(editing.content||'').replace(/\{\{\s*([a-zA-Z_][\w]*)\s*\}\}/g,(_,v)=>previewValues[v]||'{{'+v+'}}')}</Text>
+        </Box>
+        <Box mt={4}>
+         {varsFrom(editing.content).map(v=><Input key={v} size="xs" mb={2} placeholder={v} value={previewValues[v]||''} onChange={e=>setPreviewValues(prev=>({...prev,[v]:e.target.value}))}/>)}
+        </Box>
+       </Box>
+      </Box>
      </Grid>
-     <Flex justify="end" gap={2} mt={5}><Button variant="outline" onClick={()=>setEditing(null)}>Cancel</Button><Button onClick={save}>Save template</Button></Flex>
     </Box>
-   </Box>}
+   </Box>
  </Box>;
 };
 export default Templates;
