@@ -40,7 +40,7 @@ const ConversationView=()=>{
  const take=async()=>{try{await interveneInConversation(conv.id||conv._id,'supervisor-01',notes);setTaken(true);toast({title:'Control taken over',status:'success'});}catch(e){setTaken(true);toast({title:'Supervisor mode enabled',status:'success'});}};
  const release=async()=>{try{await releaseIntervention(conv.id||conv._id,notes);setTaken(false);toast({title:'Control returned to AI',status:'success'});}catch(e){setTaken(false);toast({title:'AI control restored',status:'success'});}};
  const select=(c)=>nav('/conversation/'+(c.id||c._id));
- return <Flex h="calc(100vh - 0px)" minH="700px" bg="gray.50" overflow="hidden">
+ return <><Flex h="calc(100vh - 0px)" minH="700px" bg="gray.50" overflow="hidden">
   <Box w="58px" bg="white" borderRight="1px solid" borderColor="gray.200" display={{base:'none',md:'flex'}} flexDir="column" alignItems="center" py={5} gap={4}>
    <Icon as={FiHome} boxSize={4} color="gray.600"/><Icon as={FiMessageSquare} boxSize={4} color="brand.600"/><Icon as={FiBriefcase} boxSize={4} color="gray.600"/><Icon as={FiZap} boxSize={4} color="gray.600"/><Box flex="1"/><Icon as={FiSettings} boxSize={4} color="gray.600"/>
   </Box>
@@ -96,5 +96,6 @@ const ConversationView=()=>{
     </ModalBody>
    </ModalContent>
   </Modal>
+  </>
 };
 export default ConversationView;
