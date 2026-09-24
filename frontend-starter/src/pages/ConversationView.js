@@ -30,6 +30,7 @@ const ConversationView=()=>{
  useEffect(()=>{getTemplates().then(data=>{if(data?.length)setTemplates(data.map(t=>({...t,vars:(t.variables||[]).map(v=>v.name)})));}).catch(()=>{});},[]);
  const [templateOpen,setTemplateOpen]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[selectedTemplate,setSelectedTemplate]=useState(templates[0]),[previewName,setPreviewName]=useState('New visitor'),[variableValues,setVariableValues]=useState({customer_name:'Avery'}),[listening,setListening]=useState(false);
  const recognitionRef=React.useRef(null);
+ const shouldKeepListeningRef=React.useRef(false);
  const visibleTemplates=templates.filter(t=>t.name.toLowerCase().includes(templateSearch.toLowerCase())||t.category.toLowerCase().includes(templateSearch.toLowerCase()));
  const resolvedTemplate=(selectedTemplate?.content||'').replace(/{{\\s*([a-zA-Z_][\\w]*)\\s*}}/g,(_,name)=>variableValues[name] || `[${name}]`);
  const insertTemplate=()=>{setText(resolvedTemplate);setTemplateOpen(false);toast({title:'Template inserted',description:'Variables resolved in preview.',status:'success',duration:1800});};
@@ -41,9 +42,11 @@ const ConversationView=()=>{
      return;
    }
    if(listening){
+     shouldKeepListeningRef.current=false;
      recognitionRef.current?.stop();
      return;
    }
+   shouldKeepListeningRef.current=true;
    const recognition=new SpeechRecognition();
    recognitionRef.current=recognition;
    recognition.lang='en-US';
@@ -51,13 +54,26 @@ const ConversationView=()=>{
    recognition.continuous=true;
    recognition.maxAlternatives=1;
    recognition.onstart=()=>setListening(true);
-   recognition.onend=()=>{setListening(false);recognitionRef.current=null;};
+   recognition.onend=()=>{
+     recognitionRef.current=null;
+     if(shouldKeepListeningRef.current){
+       setTimeout(()=>{
+         if(!shouldKeepListeningRef.current) return;
+         try{
+           recognition.start();
+         }catch(error){}
+       },150);
+     }else{
+       setListening(false);
+     }
+   };
    recognition.onerror=(event)=>{
+     if(event.error==='aborted') return;
+     if(event.error==='no-speech') return;
+     shouldKeepListeningRef.current=false;
      setListening(false);
      recognitionRef.current=null;
-     if(event.error!=='aborted'){
-       toast({title:'Voice input stopped',description:event.error==='not-allowed'?'Microphone permission was denied.':'Please try speaking again.',status:'warning'});
-     }
+     toast({title:'Voice input stopped',description:event.error==='not-allowed'?'Microphone permission was denied.':'Please try speaking again.',status:'warning'});
    };
    recognition.onresult=(event)=>{
      let finalText='';
@@ -72,11 +88,12 @@ const ConversationView=()=>{
      recognition.start();
      toast({title:'Listening',description:'Speak your supervisor response. Click Voice input again to stop.',status:'info',duration:2200});
    }catch(error){
+     shouldKeepListeningRef.current=false;
      setListening(false);
      recognitionRef.current=null;
    }
  };
- useEffect(()=>()=>{recognitionRef.current?.stop();},[]);
+ useEffect(()=>()=>{shouldKeepListeningRef.current=false;recognitionRef.current?.stop();},[]);
  useEffect(()=>setConv(list.find(c=>String(c.id||c._id)===String(id))||list[0]),[id,conversations]);
  useEffect(()=>{if(conv){setText('');setTaken(conv.humanIntervention?.occurred===true)}},[conv?.id]);
  if(!conv)return <Box p={8}>Loading conversation...</Box>;
