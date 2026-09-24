@@ -1,7 +1,6 @@
 import React,{useMemo,useState} from 'react';
-import {Box,Flex,Grid,Heading,Text,Button,HStack,SimpleGrid,Badge,Icon,Progress,Table,Thead,Tbody,Tr,Th,Td} from '@chakra-ui/react';
-import {FiMessageCircle,FiAlertTriangle,FiClock,FiSmile,FiActivity,FiArrowUpRight,FiChevronRight,FiMoreHorizontal} from 'react-icons/fi';
-import {LineChart,Line,XAxis,YAxis,Tooltip,ResponsiveContainer,CartesianGrid} from 'recharts';
+import {Box,Flex,Grid,Heading,Text,Button,HStack,SimpleGrid,Badge,Icon,Progress,Table,Thead,Tbody,Tr,Th,Td,Spinner} from '@chakra-ui/react';
+import {FiMessageCircle,FiAlertTriangle,FiClock,FiSmile,FiActivity,FiArrowUpRight,FiChevronRight} from 'react-icons/fi';
 import {useAppData} from '../context/AppDataContext';
 import {useNavigate} from 'react-router-dom';
 
