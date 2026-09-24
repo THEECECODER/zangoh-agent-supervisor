@@ -29,20 +29,54 @@ const ConversationView=()=>{
  const [conv,setConv]=useState(null),[taken,setTaken]=useState(false),[text,setText]=useState(''),[notes,setNotes]=useState('');
  useEffect(()=>{getTemplates().then(data=>{if(data?.length)setTemplates(data.map(t=>({...t,vars:(t.variables||[]).map(v=>v.name)})));}).catch(()=>{});},[]);
  const [templateOpen,setTemplateOpen]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[selectedTemplate,setSelectedTemplate]=useState(templates[0]),[previewName,setPreviewName]=useState('New visitor'),[variableValues,setVariableValues]=useState({customer_name:'Avery'}),[listening,setListening]=useState(false);
+ const recognitionRef=React.useRef(null);
  const visibleTemplates=templates.filter(t=>t.name.toLowerCase().includes(templateSearch.toLowerCase())||t.category.toLowerCase().includes(templateSearch.toLowerCase()));
  const resolvedTemplate=(selectedTemplate?.content||'').replace(/{{\\s*([a-zA-Z_][\\w]*)\\s*}}/g,(_,name)=>variableValues[name] || `[${name}]`);
  const insertTemplate=()=>{setText(resolvedTemplate);setTemplateOpen(false);toast({title:'Template inserted',description:'Variables resolved in preview.',status:'success',duration:1800});};
  const list=conversations.length?conversations:demo;
  const startVoice=()=>{
    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-   if(!SpeechRecognition){toast({title:'Voice input unavailable',description:'Use Chrome or Edge for Web Speech API support.',status:'warning'});return;}
-   const recognition=new SpeechRecognition(); recognition.lang='en-US'; recognition.interimResults=true; recognition.continuous=false;
+   if(!SpeechRecognition){
+     toast({title:'Voice input unavailable',description:'Use Chrome or Edge and allow microphone access.',status:'warning'});
+     return;
+   }
+   if(listening){
+     recognitionRef.current?.stop();
+     return;
+   }
+   const recognition=new SpeechRecognition();
+   recognitionRef.current=recognition;
+   recognition.lang='en-US';
+   recognition.interimResults=true;
+   recognition.continuous=true;
+   recognition.maxAlternatives=1;
    recognition.onstart=()=>setListening(true);
-   recognition.onend=()=>setListening(false);
-   recognition.onerror=()=>{setListening(false);toast({title:'Voice input stopped',status:'warning'});};
-   recognition.onresult=e=>{let transcript='';for(let i=e.resultIndex;i<e.results.length;i++)transcript+=e.results[i][0].transcript; if(e.results[e.results.length-1].isFinal)setText(prev=>(prev?prev+' ':'')+transcript);};
-   recognition.start();
+   recognition.onend=()=>{setListening(false);recognitionRef.current=null;};
+   recognition.onerror=(event)=>{
+     setListening(false);
+     recognitionRef.current=null;
+     if(event.error!=='aborted'){
+       toast({title:'Voice input stopped',description:event.error==='not-allowed'?'Microphone permission was denied.':'Please try speaking again.',status:'warning'});
+     }
+   };
+   recognition.onresult=(event)=>{
+     let finalText='';
+     for(let i=event.resultIndex;i<event.results.length;i++){
+       if(event.results[i].isFinal) finalText += event.results[i][0].transcript;
+     }
+     if(finalText.trim()){
+       setText(prev=>(prev?prev+' ':'')+finalText.trim());
+     }
+   };
+   try{
+     recognition.start();
+     toast({title:'Listening',description:'Speak your supervisor response. Click Voice input again to stop.',status:'info',duration:2200});
+   }catch(error){
+     setListening(false);
+     recognitionRef.current=null;
+   }
  };
+ useEffect(()=>()=>{recognitionRef.current?.stop();},[]);
  useEffect(()=>setConv(list.find(c=>String(c.id||c._id)===String(id))||list[0]),[id,conversations]);
  useEffect(()=>{if(conv){setText('');setTaken(conv.humanIntervention?.occurred===true)}},[conv?.id]);
  if(!conv)return <Box p={8}>Loading conversation...</Box>;
