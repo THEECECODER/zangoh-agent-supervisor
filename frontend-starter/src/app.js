@@ -11,5 +11,5 @@ import Templates from './pages/Templates';
 import {WebSocketProvider} from './context/WebSocketContext';
 import {AppDataProvider} from './context/AppDataContext';
 
-function App(){return <ChakraProvider theme={theme}><WebSocketProvider><AppDataProvider><Router><Box minH="100vh"><Layout><Routes><Route path="/" element={<Dashboard/>}/><Route path="/conversations" element={<Dashboard/>}/><Route path="/conversation/:id" element={<ConversationView/>}/><Route path="/agent-config" element={<AgentConfig/>}/><Route path="/templates" element={<Templates/>}/><Route path="/Analysis" element={<Analysis/>}/></Routes></Layout></Box></Router></AppDataProvider></WebSocketProvider></ChakraProvider>}
+function App(){return <ChakraProvider theme={theme}><WebSocketProvider><AppDataProvider><Router><Box minH="100vh"><Layout><Routes><Route path="/" element={<Dashboard/>}/><Route path="/conversations" element={<ConversationView/>}/><Route path="/conversation/:id" element={<ConversationView/>}/><Route path="/agent-config" element={<AgentConfig/>}/><Route path="/templates" element={<Templates/>}/><Route path="/Analysis" element={<Analysis/>}/></Routes></Layout></Box></Router></AppDataProvider></WebSocketProvider></ChakraProvider>}
 export default App;
