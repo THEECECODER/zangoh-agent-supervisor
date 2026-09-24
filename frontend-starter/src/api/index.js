@@ -94,3 +94,21 @@ export const getAnalytics = async (params) => {
 };
 
 export default api;
+
+
+export const getTemplates = async () => {
+  const response = await api.get('/api/templates');
+  return response.data;
+};
+export const createTemplate = async (template) => {
+  const response = await api.post('/api/templates', template);
+  return response.data;
+};
+export const updateTemplate = async (id, template) => {
+  const response = await api.patch(`/api/templates/${id}`, template);
+  return response.data;
+};
+export const getDashboardMetrics = async () => {
+  const response = await api.get('/api/dashboard/metrics');
+  return response.data;
+};
