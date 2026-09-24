@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, IconButton, Input, InputGroup, InputLeftElement, Avatar, Text, Badge, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
-import { FiSearch, FiMenu, FiBell, FiMoon, FiUser } from 'react-icons/fi';
+import { FiSearch, FiMenu, FiBell, FiMoon, FiSun } from 'react-icons/fi';
 import { useColorMode } from '@chakra-ui/react';
 
 const Header = () => {
@@ -17,7 +17,7 @@ const Header = () => {
           <Input placeholder="Search conversations, agents..." bg="rgba(255,255,255,.10)" border="1px solid rgba(255,255,255,.18)" color="white" _placeholder={{color:'purple.100'}} _focus={{bg:'white',color:'gray.800'}}/>
         </InputGroup>
         <Flex ml="auto" align="center" gap={1}>
-          <IconButton aria-label="theme" icon={colorMode==='light'?<FiMoon/>:<FiUser/>} variant="ghost" color="white" onClick={toggleColorMode}/>
+          <IconButton aria-label="theme" icon={colorMode==='light'?<FiMoon/>:<FiSun/>} variant="ghost" color="white" onClick={toggleColorMode}/>
           <Box position="relative">
             <IconButton aria-label="notifications" icon={<FiBell/>} variant="ghost" color="white"/>
             <Badge position="absolute" top="0" right="-1" borderRadius="full" bg="red.400" color="white" fontSize="10px" px={1.5}>3</Badge>
