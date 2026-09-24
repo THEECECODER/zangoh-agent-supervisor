@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {Box,Flex,Text,Button,VStack,HStack,Avatar,Divider,Textarea,Badge,Heading,Progress,Input,Icon,Tooltip,useToast,Grid,Select,Modal,ModalOverlay,ModalContent,ModalBody} from '@chakra-ui/react';
-import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3,FiStar} from 'react-icons/fi';
+import {FiHome,FiMessageSquare,FiBriefcase,FiZap,FiSettings,FiSearch,FiSend,FiShield,FiChevronDown,FiCheckCircle,FiEdit3,FiStar,FiMic,FiMicOff} from 'react-icons/fi';
 import {useParams,useNavigate} from 'react-router-dom';
 import {useAppData} from '../context/AppDataContext';
 import {addMessage,interveneInConversation,releaseIntervention} from '../api';
@@ -27,11 +27,21 @@ const templates=[
 const ConversationView=()=>{
  const {id}=useParams(); const nav=useNavigate(); const {conversations}=useAppData(); const toast=useToast();
  const [conv,setConv]=useState(null),[taken,setTaken]=useState(false),[text,setText]=useState(''),[notes,setNotes]=useState('');
- const [templateOpen,setTemplateOpen]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[selectedTemplate,setSelectedTemplate]=useState(templates[0]),[previewName,setPreviewName]=useState('New visitor');
+ const [templateOpen,setTemplateOpen]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[selectedTemplate,setSelectedTemplate]=useState(templates[0]),[previewName,setPreviewName]=useState('New visitor'),[variableValues,setVariableValues]=useState({customer_name:'Avery'}),[listening,setListening]=useState(false);
  const visibleTemplates=templates.filter(t=>t.name.toLowerCase().includes(templateSearch.toLowerCase())||t.category.toLowerCase().includes(templateSearch.toLowerCase()));
- const resolvedTemplate=(selectedTemplate?.content||'').replaceAll('{{customer_name}}',previewName==='New visitor'?'Avery':previewName);
+ const resolvedTemplate=(selectedTemplate?.content||'').replace(/{{\\s*([a-zA-Z_][\\w]*)\\s*}}/g,(_,name)=>variableValues[name] || `[${name}]`);
  const insertTemplate=()=>{setText(resolvedTemplate);setTemplateOpen(false);toast({title:'Template inserted',description:'Variables resolved in preview.',status:'success',duration:1800});};
  const list=conversations.length?conversations:demo;
+ const startVoice=()=>{
+   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+   if(!SpeechRecognition){toast({title:'Voice input unavailable',description:'Use Chrome or Edge for Web Speech API support.',status:'warning'});return;}
+   const recognition=new SpeechRecognition(); recognition.lang='en-US'; recognition.interimResults=true; recognition.continuous=false;
+   recognition.onstart=()=>setListening(true);
+   recognition.onend=()=>setListening(false);
+   recognition.onerror=()=>{setListening(false);toast({title:'Voice input stopped',status:'warning'});};
+   recognition.onresult=e=>{let transcript='';for(let i=e.resultIndex;i<e.results.length;i++)transcript+=e.results[i][0].transcript; if(e.results[e.results.length-1].isFinal)setText(prev=>(prev?prev+' ':'')+transcript);};
+   recognition.start();
+ };
  useEffect(()=>setConv(list.find(c=>String(c.id||c._id)===String(id))||list[0]),[id,conversations]);
  useEffect(()=>{if(conv){setText('');setTaken(conv.humanIntervention?.occurred===true)}},[conv?.id]);
  if(!conv)return <Box p={8}>Loading conversation...</Box>;
@@ -56,7 +66,7 @@ const ConversationView=()=>{
      <Box px={4} py={2.5} bg="yellow.50" borderBottom="1px solid" borderColor="yellow.100"><Text fontSize="9px" fontWeight="800">⚠ SLA breach likely in 03:18</Text><Text fontSize="8px" color="gray.600">AI confidence fell after policy exception request</Text></Box>
      <VStack p={4} spacing={3} align="stretch">{messages.map((m,i)=><Flex key={i} justify={m.sender==='customer'?'start':'end'}><Box maxW="78%" bg={m.sender==='customer'?'gray.100':m.sender==='supervisor'?'brand.50':'purple.50'} px={3} py={2.5} borderRadius="9px"><Text fontSize="7px" color="gray.500" fontWeight="800" mb={1}>{m.sender==='customer'?'CUSTOMER':m.sender==='supervisor'?'SUPERVISOR':'AI AGENT'} · {i+1}{m.sender!=='customer'&&' · 11:32'}</Text><Text fontSize="10px" lineHeight="1.5">{m.text}</Text></Box></Flex>)}</VStack>
      <Box mx={4} mb={3} p={3} bg="gray.50" border="1px solid" borderColor="gray.200" borderRadius="9px"><Flex justify="space-between" align="center"><Box><Text fontSize="9px" fontWeight="800">Co-pilot recommendation</Text><Text fontSize="8px" color="gray.500">Generated from policy, customer tier, and conversation sentiment</Text></Box><Badge colorScheme="green" fontSize="8px">● Confidence 88%</Badge></Flex><Text fontSize="8px" mt={2}>Approve expedited refund of ₹8,420 and waive the standard review period.</Text><Text fontSize="7px" color="gray.500" mt={1}>Evidence: return scan received · item category eligible · customer lifetime value: high</Text><HStack mt={2}><Button size="xs" onClick={()=>setText('I’ve reviewed the return evidence and approved an expedited refund.')}>Approve action</Button><Button size="xs" variant="outline" onClick={()=>setText('I’m reviewing the evidence and will update you shortly.')}>Edit response</Button><Button size="xs" variant="outline">Escalate policy</Button></HStack></Box>
-     <Box mx={4} mb={4} p={3} border="1px solid" borderColor="gray.200" borderRadius="9px"><Flex justify="space-between" mb={2}><Text fontSize="9px" fontWeight="800">Supervisor response</Text><Button size="xs" variant="ghost" rightIcon={<FiChevronDown/>} onClick={()=>setTemplateOpen(true)}>Template</Button></Flex><Textarea value={text} onChange={e=>setText(e.target.value)} placeholder={taken?'Type a supervisor response...':'Take over to send a supervisor response.'} isDisabled={!taken} rows={2} fontSize="9px"/><Flex justify="end" mt={2}><Button size="xs" leftIcon={<FiSend/>} isDisabled={!taken||!text.trim()} onClick={send}>Send reply</Button></Flex></Box>
+     <Box mx={4} mb={4} p={3} border="1px solid" borderColor="gray.200" borderRadius="9px"><Flex justify="space-between" mb={2}><Text fontSize="9px" fontWeight="800">Supervisor response</Text><Button size="xs" variant="ghost" rightIcon={<FiChevronDown/>} onClick={()=>setTemplateOpen(true)}>Template</Button></Flex><Textarea value={text} onChange={e=>setText(e.target.value)} placeholder={taken?'Type or dictate a supervisor response...':'Take over to send a supervisor response.'} isDisabled={!taken} rows={2} fontSize="9px"/><Flex justify="space-between" mt={2}><Button size="xs" variant={listening?"solid":"outline"} leftIcon={listening?<FiMicOff/>:<FiMic/>} isDisabled={!taken} onClick={startVoice}>{listening?"Listening…":"Voice input"}</Button><Button size="xs" leftIcon={<FiSend/>} isDisabled={!taken||!text.trim()} onClick={send}>Send reply</Button></Flex></Box>
     </Box>
     <Box w={{base:'100%',xl:'275px'}} p={4} bg="white">
      <Heading size="xs">Customer intelligence</Heading><HStack mt={3}><Avatar size="sm" name={conv.customer?.name}/><Box><Text fontWeight="800" fontSize="10px">{conv.customer?.name} · Case #{String(conv.id||conv._id||'84291').slice(-5)}</Text><Text fontSize="8px" color="gray.500">VIP · 3.8 years · Madrid</Text></Box></HStack><Divider my={3}/><Flex justify="space-between"><Box><Text fontSize="7px" color="gray.500">LIFETIME VALUE</Text><Text fontWeight="800" fontSize="13px">₹1.24L</Text></Box><Box><Text fontSize="7px" color="gray.500">ORDERS</Text><Text fontWeight="800" fontSize="13px">38</Text></Box></Flex><Flex justify="space-between" mt={3}><Box><Text fontSize="7px" color="gray.500">RETURN RATE</Text><Text fontWeight="800" fontSize="11px">5.2%</Text></Box><Box><Text fontSize="7px" color="gray.500">SENTIMENT</Text><Text fontWeight="800" fontSize="11px" color="red.500">−0.62</Text></Box></Flex><Divider my={4}/><Text fontSize="10px" fontWeight="800">Case diagnostics</Text><Text fontSize="7px" color="gray.500">Signals contributing to risk</Text>{[['Repeat contact',92,'red'],['Negative sentiment',76,'orange'],['Policy exception',66,'blue'],['Churn propensity',58,'purple']].map(([n,v,c])=><Box mt={3} key={n}><Flex justify="space-between" fontSize="8px"><Text>{n}</Text><Text>{v}%</Text></Flex><Progress mt={1} value={v} size="xs" colorScheme={c}/></Box>)}<Divider my={4}/><Text fontSize="8px" color="gray.400" mb={1}>Feedback Notes</Text><Textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Write here..." h="110px" fontSize="9px" bg="yellow.50" borderColor="yellow.100"/><Button mt={3} w="100%" size="sm" leftIcon={<FiCheckCircle/>} onClick={()=>toast({title:'Case marked resolved',status:'success'})}>Mark as Resolved</Button>
@@ -86,8 +96,9 @@ const ConversationView=()=>{
       </Box>
       <Box p={4} borderLeft="1px solid" borderColor="gray.200">
        <Text fontSize="9px" fontWeight="900">Preview</Text><Text fontSize="8px" color="gray.500">Review the selected reply before inserting.</Text>
-       <Text fontSize="8px" fontWeight="800" mt={4} mb={1}>PREVIEW AS</Text>
-       <Select size="sm" value={previewName} onChange={e=>setPreviewName(e.target.value)}><option>New visitor</option><option>Elena Vasquez</option><option>Marcus Lee</option></Select>
+       <Text fontSize="8px" fontWeight="800" mt={4} mb={1}>FILL VARIABLES</Text>
+       {selectedTemplate?.vars?.map(v=><Input key={v} size="sm" mb={2} value={variableValues[v]||''} onChange={e=>setVariableValues(prev=>({...prev,[v]:e.target.value}))} placeholder={v}/>)} 
+       <Select size="sm" value={previewName} onChange={e=>{setPreviewName(e.target.value);setVariableValues(prev=>({...prev,customer_name:e.target.value==='New visitor'?'Avery':e.target.value}))}}><option>New visitor</option><option>Elena Vasquez</option><option>Marcus Lee</option></Select>
        <Box mt={3} p={3} bg="gray.50" borderRadius="9px"><Badge mb={2} colorScheme="purple">Live preview</Badge><Text fontSize="9px" lineHeight="1.6">{resolvedTemplate}</Text><Button mt={3} size="xs" w="100%">View getting started</Button></Box>
        <Box mt={4} p={3} bg="green.50" borderRadius="8px"><Text fontSize="9px" fontWeight="800" color="green.700">✓ {selectedTemplate?.vars?.length||0} variables resolved</Text><Text fontSize="8px" color="gray.600">You can edit the message after inserting.</Text></Box>
        <Flex justify="end" gap={2} mt={5}><Button size="sm" variant="outline" onClick={()=>setTemplateOpen(false)}>Cancel</Button><Button size="sm" onClick={insertTemplate}>Insert</Button></Flex>
