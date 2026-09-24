@@ -307,17 +307,22 @@ export const AppDataProvider = ({ children }) => {
     );
   };
 
-  const interveneInConversation = async (conversationId) => {
-    try {
-      await fetch(`${process.env.REACT_APP_API_URL}/api/intervene`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId }),
-      });
-      console.log(`Intervened in conversation ${conversationId}`);
-    } catch (error) {
-      console.error('Failed to intervene:', error);
+  const interveneInConversation = async (conversationId, supervisorId = 'supervisor-01', notes = '') => {
+    const response = await fetch('/api/intervene', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId, supervisorId, notes }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Failed to intervene');
     }
+    const data = await response.json();
+    setConversations(prev => prev.map(c => (c.id === conversationId || c._id === conversationId)
+      ? { ...c, status: 'escalated', humanIntervention: data.intervention }
+      : c
+    ));
+    return data;
   };
 
   return (
