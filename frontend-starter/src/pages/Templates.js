@@ -174,7 +174,7 @@ const Templates=()=>{
       </Box>
      </Grid>
     </Box>
-   </Box>
+   </Box>}
  </Box>;
 };
 export default Templates;
