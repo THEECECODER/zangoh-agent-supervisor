@@ -12,8 +12,8 @@ const Sidebar = () => {
     {name:'Templates',path:'/templates',icon:FiFileText}
   ];
   return (
-    <Box position="fixed" top="58px" left={0} bottom={0} w="206px" bg="white" borderRight="1px solid" borderColor="gray.200" zIndex={20} display={{base:'none',md:'block'}} py={5}>
-      <Text px={5} fontSize="10px" fontWeight="800" color="gray.400" letterSpacing="1px" mb={3}>WORKSPACE</Text>
+    <Box position="fixed" top="58px" left={0} bottom={0} w="206px" bg="surface" borderRight="1px solid" borderColor="border" zIndex={20} display={{base:'none',md:'block'}} py={5}>
+      <Text px={5} fontSize="10px" fontWeight="800" color="textSecondary" letterSpacing="1px" mb={3}>WORKSPACE</Text>
       <VStack spacing={1} align="stretch" px={3}>
         {items.map(item=>{
           const active=location.pathname===item.path || (item.path==='/'&&location.pathname==='/');
@@ -23,12 +23,12 @@ const Sidebar = () => {
         })}
       </VStack>
       <Divider my={6}/>
-      <Text px={5} fontSize="10px" fontWeight="800" color="gray.400" letterSpacing="1px" mb={3}>SYSTEM</Text>
+      <Text px={5} fontSize="10px" fontWeight="800" color="textSecondary" letterSpacing="1px" mb={3}>SYSTEM</Text>
       <VStack spacing={1} align="stretch" px={3}>
-        <Box px={3} py={2.5} borderRadius="7px" color="gray.600"><Flex align="center" gap={3}><Icon as={FiSettings}/><Text fontSize="13px">Settings</Text></Flex></Box>
+        <Box px={3} py={2.5} borderRadius="7px" color="textPrimary"><Flex align="center" gap={3}><Icon as={FiSettings}/><Text fontSize="13px">Settings</Text></Flex></Box>
       </VStack>
       <Box position="absolute" bottom={4} left={0} right={0} px={5}>
-        <Flex align="center" gap={2} fontSize="11px" color="gray.400"><Box w="7px" h="7px" bg="green.400" borderRadius="full"/><Text>Systems operational</Text></Flex>
+        <Flex align="center" gap={2} fontSize="11px" color="textSecondary"><Box w="7px" h="7px" bg="green.400" borderRadius="full"/><Text>Systems operational</Text></Flex>
       </Box>
     </Box>
   );
