@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {Box,Flex,Grid,Heading,Text,Button,HStack,Select,Slider,SliderTrack,SliderFilledTrack,SliderThumb,Switch,Badge,Progress,useToast} from '@chakra-ui/react';
+import {Box,Flex,Grid,Heading,Text,Button,HStack,Select,Slider,SliderTrack,SliderFilledTrack,SliderThumb,Switch,Badge,Progress,Divider,useToast} from '@chakra-ui/react';
 import {FiSave,FiRotateCcw,FiPlay} from 'react-icons/fi';
 import {useAppData} from '../context/AppDataContext';
 import {updateAgentConfig} from '../api';
