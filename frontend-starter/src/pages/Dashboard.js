@@ -3,6 +3,7 @@ import {Box,Flex,Grid,Heading,Text,Button,HStack,SimpleGrid,Badge,Icon,Progress,
 import {FiMessageCircle,FiAlertTriangle,FiClock,FiSmile,FiActivity,FiArrowUpRight,FiChevronRight} from 'react-icons/fi';
 import {useAppData} from '../context/AppDataContext';
 import {useNavigate} from 'react-router-dom';
+import {LineChart,Line,XAxis,YAxis,Tooltip,ResponsiveContainer,CartesianGrid} from 'recharts';
 
 const Card=({children,...p})=><Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="10px" {...p}/>;
 const Metric=({label,value,change,icon,color,down})=><Card p={4} borderTop="3px solid" borderTopColor={color}><Flex justify="space-between"><Box><Text fontSize="10px" color="gray.500" fontWeight="800" textTransform="uppercase" letterSpacing=".35px">{label}</Text><Heading mt={2} size="lg">{value}</Heading><HStack mt={1}><Icon as={FiArrowUpRight} transform={down?'rotate(90deg)':'none'} color={color}/><Text fontSize="10px" color={color}>{change}</Text><Text fontSize="10px" color="gray.400">vs last period</Text></HStack></Box><Box p={2.5} bg="gray.50" borderRadius="8px" color={color}><Icon as={icon} boxSize={5}/></Box></Flex></Card>;
